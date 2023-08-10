@@ -1,0 +1,119 @@
+{
+  "project_info": {
+    "project_number": "692451153183",
+    "firebase_url": "https://flowchart-f936f-default-rtdb.firebaseio.com",
+    "project_id": "flowchart-f936f",
+    "storage_bucket": "flowchart-f936f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692451153183:android:1494a1b838c5db19cacc2a",
+        "android_client_info": {
+          "package_name": "com.axiphyl.medongosupport.host"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCabz7aH8YEn8eL6Gh-OX_I_zCq3agRRtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "692451153183-aq7n36538s9ia8hpbnlu1c94betfbvu9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "preconsultation.module.mobile.axiphyl.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692451153183:android:b1147ae0fb35b5a5cacc2a",
+        "android_client_info": {
+          "package_name": "com.example.flutterdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCabz7aH8YEn8eL6Gh-OX_I_zCq3agRRtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "692451153183-aq7n36538s9ia8hpbnlu1c94betfbvu9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "preconsultation.module.mobile.axiphyl.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692451153183:android:b17d43c437426cbacacc2a",
+        "android_client_info": {
+          "package_name": "preconsultation.itachyon.medongo.module"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCabz7aH8YEn8eL6Gh-OX_I_zCq3agRRtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "692451153183-5oo32pdjaspr1s16lquav5oje130pn9m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "692451153183-aq7n36538s9ia8hpbnlu1c94betfbvu9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "preconsultation.module.mobile.axiphyl.ios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
