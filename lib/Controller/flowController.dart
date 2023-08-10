@@ -36,7 +36,7 @@ class FlowController extends GetxController {
   TextEditingController answerController = TextEditingController();
 
   ///DEFAULT AGE FOR RENDERING QUESTIONS
-  RxDouble age = (7.0).obs;
+  RxDouble age = (18.0).obs;
 
   ///DEFAULT GENDER FOR RENDERING QUESTIONS
   RxString gender = "female".obs;
@@ -135,7 +135,7 @@ class FlowController extends GetxController {
   ///GETTING THE AGE INPUT FROM USER
   void enterAge() {
     if (masterFlow[currentMainIndex.value].text == "Select Date of Birth") {
-      age.value = double.tryParse(masterFlow[currentMainIndex.value].answer) ?? 9.0;
+      age.value = double.tryParse(masterFlow[currentMainIndex.value].answer) ?? 18.0;
     }
   }
 
@@ -160,6 +160,36 @@ class FlowController extends GetxController {
   }
 
   ///CHECK ANC PNC QUESTIONS
+  checkForAncPnc(){
+    if(masterFlow[currentMainIndex.value].kind == 4){
+      if(checkCondition() == false && masterFlow[currentMainIndex.value].isPregnancy == true){
+        skipping.value = true;
+        currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![1].destElementId!);
+        masterFlow[currentMainIndex.value].previousId = preId.value;
+        checkForAncPnc();
+        update();
+        incrementForMainFlow();
+      }else{
+        if(checkCondition() == true){
+          skipping.value = false;
+          update();
+        }
+      }
+      if(checkCondition() == false && masterFlow[currentMainIndex.value].isPregnancy == false){
+        skipping.value = true;
+        currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![1].destElementId!);
+        masterFlow[currentMainIndex.value].previousId = preId.value;
+        checkForAncPnc();
+        update();
+        incrementForMainFlow();
+      }else{
+        skipping.value = false;
+        update();
+      }
+    }
+    return;
+  }
+
 
 
 
@@ -198,11 +228,6 @@ class FlowController extends GetxController {
     int index = masterFlow.indexWhere((element) => element.id == id);
     return index >= 0 ? index : currentMainIndex.value - 1;
   }
-
-  move(){
-
-}
-
 
 
   /// INCREMENT LOGIC FOR QUESTIONS
@@ -250,12 +275,11 @@ class FlowController extends GetxController {
 
       ///FOR CONDITIONAL QUESTIONS
       case 4:{
-        print("condition ${checkCondition()}");
-        print("in case 4");
-        print("skipping $skipping");
         if (skipping.value == false) {
-          print("skipping $skipping");
           previousSkipId.value = masterFlow[currentMainIndex.value].id;
+          debugPrint("this is current question id ${previousSkipId.value} \n"
+              " and this is current question ${masterFlow[currentMainIndex.value].text} \n "
+              "and this is previous id ${masterFlow[currentMainIndex.value].previousId}");
           update();
         }
 
@@ -268,17 +292,6 @@ class FlowController extends GetxController {
           answerController.clear();
           checkAnswerAvailable();
           update();
-
-          if(masterFlow[currentMainIndex.value].isPregnancy == true && checkCondition() == false){
-            print("i am ravi1");
-            skipping.value = true;
-            preId.value = previousSkipId.value;
-            currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![0].destElementId!);
-            masterFlow[currentMainIndex.value].previousId = preId.value;
-            update();
-            incrementForMainFlow();
-            return;
-          }
 
 
           if (checkCondition() == true) {
@@ -296,6 +309,7 @@ class FlowController extends GetxController {
             preId.value = previousSkipId.value;
             update();
             incrementForMainFlow();
+            checkForAncPnc();
           }
           return;
         }
@@ -310,43 +324,6 @@ class FlowController extends GetxController {
           checkAnswerAvailable();
           update();
 
-
-          if(checkCondition() == false){
-            // if(masterFlow[currentMainIndex.value].isPregnancy == true ){
-            //   print("i am ravi2");
-            //   skipping.value = true;
-            //   while(masterFlow[currentMainIndex.value].isPregnancy == true){
-            //     currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![1].destElementId!);
-            //     masterFlow[currentMainIndex.value].previousId = previousSkipId.value;
-            //     update();
-            //   }
-            //   incrementForMainFlow();
-            //   return;
-            // }
-          }else{
-            if(skipping.value == true){
-              skipping.value = false;
-
-              update();
-            }
-          }
-
-          if(masterFlow[currentMainIndex.value].isPregnancy == false){
-            print("1");
-            if(checkCondition() == false){
-              print("2");
-              skipping.value = true;
-              print("3");
-              currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![1].destElementId!);
-              print("4");
-              masterFlow[currentMainIndex.value].previousId = previousSkipId.value;
-              print("5");
-              update();
-            }
-            incrementForMainFlow();
-            return;
-          }
-
           if (checkCondition() == true) {
             if (skipping.value == false) {
               preId.value = previousSkipId.value;
@@ -358,12 +335,13 @@ class FlowController extends GetxController {
               update();
             }
           } else {
-            print("this is the no 1");
-            skipping.value = true;
-            preId.value = previousSkipId.value;
-            update();
-            incrementForMainFlow();
-          }
+              skipping.value = true;
+              preId.value = previousSkipId.value;
+              update();
+              incrementForMainFlow();
+              checkForAncPnc();
+            }
+
           return;
         }
 
@@ -387,7 +365,6 @@ class FlowController extends GetxController {
             return;
           }
 
-
           if (checkCondition() == true) {
             if (skipping.value == false) {
               preId.value = previousSkipId.value;
@@ -403,6 +380,7 @@ class FlowController extends GetxController {
             preId.value = previousSkipId.value;
             update();
             incrementForMainFlow();
+            checkForAncPnc();
           }
           return;
         }
@@ -522,6 +500,7 @@ class FlowController extends GetxController {
 
 
       ///FOR OPTIONS
+      case 7 :
       case 8 :{
         enterAge();
         enterGender();
@@ -574,22 +553,19 @@ class FlowController extends GetxController {
                     getMainIndexById(masterFlow[currentMainIndex.value-1].id);
                 debugPrint( "dsasassaas ${getMainIndexById(masterFlow[currentMainIndex.value].previousId)}");
                 debugPrint("index after $currentMainIndex");
-                answerController.text =
-                    masterFlow[currentMainIndex.value].answer;
+                answerController.text = masterFlow[currentMainIndex.value].answer;
                 startEndIndex.clear();
                 debugPrint("start end index ${jsonEncode(startEndIndex)}");
                 debugPrint("cleared list ${jsonEncode(startEndIndex)}");
                 // printFlow();
               }
-              if (startEndIndex.isNotEmpty &&
-                  currentMainIndex.value == startEndIndex[i].start!) {
+              if (startEndIndex.isNotEmpty && currentMainIndex.value == startEndIndex[i].start!) {
                 debugPrint("start end index ${jsonEncode(startEndIndex)}");
                 masterFlow.removeRange(startEndIndex[i].start, startEndIndex[i].end + 1);
                 debugPrint("start end index ${jsonEncode(startEndIndex)}");
                 print("masterflow list $masterFlow");
                 debugPrint("index before $currentMainIndex");
-                currentMainIndex.value =
-                    getMainIndexById(masterFlow[currentMainIndex.value - 1].id);
+                currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value - 1].id);
                 debugPrint("index after $currentMainIndex");
                 answerController.text =
                     masterFlow[currentMainIndex.value].answer;
@@ -608,6 +584,7 @@ class FlowController extends GetxController {
       case 3:
       case 1:
       case 8:
+      case 7:
         {
           currentMainIndex.value =
               getMainIndexById(masterFlow[currentMainIndex.value].previousId);
