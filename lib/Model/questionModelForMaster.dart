@@ -129,16 +129,9 @@ class Elements {
 
   factory Elements.fromJson(Map<String, dynamic> json) => Elements(
         next: json["next"] != null ? nextFromJson(json['next']) : null,
-        ageGroup: json["ageGroup"] != null
-            ? List<AgeGroup>.from(
-                json["ageGroup"].map((x) => AgeGroup.fromJson(x)))
-            : [],
-        range: json["range"] != null
-            ? List<Range>.from(json["range"].map((x) => Range.fromJson(x)))
-            : [],
-        genderGroup: json["genderGroup"] != null
-            ? List<dynamic>.from(json["genderGroup"])
-            : [],
+        ageGroup: json["ageGroup"] != null ? List<AgeGroup>.from(json["ageGroup"].map((x) => AgeGroup.fromJson(x))) : [],
+        range: json["range"] != null ? List<Range>.from(json["range"].map((x) => Range.fromJson(x))) : [],
+        genderGroup: json["genderGroup"] != null ? List<dynamic>.from(json["genderGroup"]) : [],
         navigationId: json["navigationId"] ?? "",
         kind: json["kind"] ?? 0,
         id: json["id"] ?? "",
@@ -159,9 +152,7 @@ class Elements {
         textColor: json["textColor"],
         textIsBold: json["textIsBold"],
         textSize: json["textSize"],
-        handlers: json["handlers"] != null
-            ? List<dynamic>.from(json["handlers"])
-            : null,
+        handlers: json["handlers"] != null ? List<dynamic>.from(json["handlers"]) : null,
         multiOptions: json["multiOptions"],
         isMandatory: json["isMandatory"],
         isFollowUp: json["isFollowUp"],
@@ -194,9 +185,7 @@ class Next {
   String? destElementId;
 
   factory Next.fromJson(Map<String, dynamic> json) => Next(
-        arrowParams: json["arrowParams"] != null
-            ? ArrowParams.fromJson(json["arrowParams"])
-            : null,
+        arrowParams: json["arrowParams"] != null ? ArrowParams.fromJson(json["arrowParams"]) : null,
         destElementId: json["destElementId"],
       );
 
@@ -329,18 +318,21 @@ String questionErrorsToJson(List<StartEndIndex> data) =>
 class StartEndIndex {
   var start;
   var end;
+  var skipped;
 
   StartEndIndex({
     required this.start,
     required this.end,
+    this.skipped,
   });
 
   factory StartEndIndex.fromJson(Map<String, dynamic> json) => StartEndIndex(
         start: json["start"],
         end: json["end"],
+        skipped: json["skipped"]
       );
 
   Map<String, dynamic> toJson() {
-    return {'start': start, 'end': end};
+    return {'start': start, 'end': end, 'skipped': skipped};
   }
 }
