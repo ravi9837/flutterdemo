@@ -63,7 +63,7 @@ class FlowController extends GetxController {
   void getFlows() async {
     try {
       QuerySnapshot<Map<String, dynamic>> res =
-          await firebaseFirestore.collection('clinicalPathwayFlowCharts').get();
+      await firebaseFirestore.collection('clinicalPathwayFlowCharts').get();
       flowsData = questionsMainFromJson(res.docs);
       debugPrint("this is the length of the flowsdata list ${flowsData.length}");
       String? id;
@@ -89,8 +89,6 @@ class FlowController extends GetxController {
       }
     }
   }
-
-
   ///GETTING THE MASTER FLOW TO THE MASTERFLOW LIST
   void getMasterFlow(String id) async {
     try {
@@ -101,7 +99,7 @@ class FlowController extends GetxController {
         previousMainId.value = masterFlow[currentMainIndex.value].id;
         masterFlow[currentMainIndex.value].previousId = previousMainId.value;
         for(int i = 0 ; i < masterFlow.length;i++){
-          debugPrint("this is master flow $i :  ${jsonEncode(masterFlow[i].text)}");
+          debugPrint("this is master flow $i : ${jsonEncode(masterFlow[i].text)}");
         }
       }
     } catch (e) {
@@ -113,19 +111,19 @@ class FlowController extends GetxController {
 
   ///ADDING THE SUBFLOW TO THE MASTERFLOW LIST JUST AFTER THE CURRENT INDEX WHEN THE CONNECTOR COMES
   void getSubFlow(String id) {
-      try {
-        FlowMain? document = flowsData.firstWhere((data) =>
-        data.flowchartId == id);
-        masterFlow.insertAll(currentMainIndex.value + 1, document.elements!);
-        for(int i = 0 ; i < masterFlow.length;i++){
-          debugPrint("this is master flow $i :  ${jsonEncode(masterFlow[i].text)}");
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print(e);
-        }
+    try {
+      FlowMain? document = flowsData.firstWhere((data) =>
+      data.flowchartId == id);
+      masterFlow.insertAll(currentMainIndex.value + 1, document.elements!);
+      for(int i = 0 ; i < masterFlow.length;i++){
+        debugPrint("this is master flow $i : ${jsonEncode(masterFlow[i].text)}");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
       }
     }
+  }
 
 
   ///ADDING THE FIRST AND THE LAST SUB FLOW INDEX TO THE MODEL LIST TO USE IT IN FUTURE
@@ -142,38 +140,22 @@ class FlowController extends GetxController {
   }
 
 
-
-  removeSkippedFlow() {
-    for(int i = 0; i < startEndIndex.length;i++){
-      if(startEndIndex[i].skipped == true || startEndIndex[i].skipped == "true"){
-        print("this the master flow range before removing ${masterFlow.length}");
-        masterFlow.removeRange(startEndIndex[i].start, startEndIndex[i].end+1);
-        print("this the master flow range after removing ${masterFlow.length}");
-        print("this the start end list before removing ${startEndIndex}");
-        startEndIndex.removeAt(i);
-        print("this the start end list after removing ${startEndIndex}");
-        update();
-      }
-    }
-  }
-
-
   ///GETTING THE AGE INPUT FROM USER
   void enterAge() {
-    if (masterFlow[currentMainIndex.value].text == "Select Date of Birth") {
+    if (masterFlow[currentMainIndex.value].text == "Sel ect Date of Birth") {
       age.value = double.tryParse(masterFlow[currentMainIndex.value].answer) ?? 18.0;
     }
   }
 
-  ///GETTING THE GENDER INPUT FROM USER
+  ///GETTING THE GENDER INPUT FR OM USER
   void enterGender() {
-    if (masterFlow[currentMainIndex.value].text == "Select Gender") {
+    if (masterFlow[currentMainIndex.value].text == "Sel ect Gender") {
       gender.value = masterFlow[currentMainIndex.value].answer ?? "female";
     }
   }
 
   ///CHECKING IF THE ANSWER AVAILABLE IN FIREBASE OR NOT IF AVAILABLE THAN PREFETCH IT TO THE TEXT FIELD
-  void checkAnswerAvailable() {
+  checkAnswerAvailable() {
     try {
       if (masterFlow[currentMainIndex.value].answer != "" ||
           masterFlow[currentMainIndex.value].answer != null) {
@@ -224,8 +206,8 @@ class FlowController extends GetxController {
     bool showQues = false;
 
     for (int i = 0;
-        i < masterFlow[index].ageGroup.length;
-        i++) {
+    i < masterFlow[index].ageGroup.length;
+    i++) {
       if ((age.value >= masterFlow[index].ageGroup[i].start) &&
           (age.value <= masterFlow[index].ageGroup[i].end)) {
         ageMet = true;
@@ -233,8 +215,8 @@ class FlowController extends GetxController {
     }
 
     for (int i = 0;
-        i < masterFlow[index].genderGroup.length;
-        i++) {
+    i < masterFlow[index].genderGroup.length;
+    i++) {
       if (masterFlow[index].genderGroup[i] == gender.value) {
         genderMet = true;
       }
@@ -256,15 +238,13 @@ class FlowController extends GetxController {
 
   /// INCREMENT LOGIC FOR QUESTIONS
   Future<void> incrementForMainFlow() async {
-    ///removing the skipped flow need to work on it
-    // await removeSkippedFlow();
     ///
     previousMainId.value = masterFlow[currentMainIndex.value].id;
     masterFlow[currentMainIndex.value].answer = answerController.text;
     update();
 
     switch(masterFlow[currentMainIndex.value].kind){
-      ///FOR NORMAL QUESTIONS
+    ///FOR NORMAL QUESTIONS
       case 0 :{
         enterAge();
         enterGender();
@@ -277,7 +257,7 @@ class FlowController extends GetxController {
             masterFlow[currentMainIndex.value].next![0].destElementId!);
         masterFlow[currentMainIndex.value].previousId = preId.value;
         answerController.clear();
-        checkAnswerAvailable();
+        await checkAnswerAvailable();
         update();
 
         if (checkCondition(currentMainIndex.value) == true) {
@@ -300,7 +280,7 @@ class FlowController extends GetxController {
       break;
 
 
-      ///FOR CONDITIONAL QUESTIONS
+    ///FOR CONDITIONAL QUESTIONS
       case 4:{
         if (skipping.value == false) {
           previousSkipId.value = masterFlow[currentMainIndex.value].id;
@@ -317,7 +297,7 @@ class FlowController extends GetxController {
           currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![0].destElementId!);
           masterFlow[currentMainIndex.value].previousId = preId.value;
           answerController.clear();
-          checkAnswerAvailable();
+          // checkAnswerAvailable();
           update();
 
 
@@ -348,7 +328,7 @@ class FlowController extends GetxController {
               masterFlow[currentMainIndex.value].next![1].destElementId!);
           masterFlow[currentMainIndex.value].previousId = preId.value;
           answerController.clear();
-          checkAnswerAvailable();
+          await checkAnswerAvailable();
           update();
 
           if (checkCondition(currentMainIndex.value) == true) {
@@ -362,23 +342,23 @@ class FlowController extends GetxController {
               update();
             }
           } else {
-              skipping.value = true;
-              preId.value = previousSkipId.value;
-              update();
-              incrementForMainFlow();
-              checkForAncPnc();
-            }
+            skipping.value = true;
+            preId.value = previousSkipId.value;
+            update();
+            incrementForMainFlow();
+            checkForAncPnc();
+          }
 
           return;
         }
 
-        ///IF THERE IS MORE THAN 2 PATHS FROM A DIAMOND
+        ///IF THERE IS MORE THAN 2 PATHS FR OM A DIAMOND
         if (answerController.value.text == "2") {
           currentMainIndex.value = getMainIndexById(
               masterFlow[currentMainIndex.value].next![2].destElementId!);
           masterFlow[currentMainIndex.value].previousId = preId.value;
           answerController.clear();
-          checkAnswerAvailable();
+          await checkAnswerAvailable();
           update();
 
           if(masterFlow[currentMainIndex.value].isPregnancy == true && checkCondition(currentMainIndex.value) == false){
@@ -415,7 +395,7 @@ class FlowController extends GetxController {
       break;
 
 
-      ///FOR START ELEMENT
+    ///FOR START ELEMENT
       case 2:{
         if (skipping.value == false) {
           previousSkipId.value = masterFlow[currentMainIndex.value].id;
@@ -426,7 +406,7 @@ class FlowController extends GetxController {
             masterFlow[currentMainIndex.value].next![0].destElementId!);
         masterFlow[currentMainIndex.value].previousId = preId.value;
         answerController.clear();
-        // checkAnswerAvailable();
+        await checkAnswerAvailable();
         update();
         if (checkCondition(currentMainIndex.value) == true) {
           if (skipping.value == false) {
@@ -448,7 +428,7 @@ class FlowController extends GetxController {
       break;
 
 
-      ///FOR END ELEMENT
+    ///FOR END ELEMENT
       case 3:{
         if(currentMainIndex.value != masterFlow.length - 1){
           if (skipping.value == false) {
@@ -461,7 +441,7 @@ class FlowController extends GetxController {
               currentMainIndex.value =
                   getMainIndexById(masterFlow[v].next![0].destElementId!);
               answerController.clear();
-              checkAnswerAvailable();
+              await checkAnswerAvailable();
               update();
             }
           }
@@ -488,7 +468,7 @@ class FlowController extends GetxController {
       break;
 
 
-      /// FOR CONNECTOR
+    /// FOR CONNECTOR
       case 1:{
         getSubFlow(masterFlow[currentMainIndex.value].navigationId);
         if (skipping.value == false) {
@@ -500,12 +480,12 @@ class FlowController extends GetxController {
           end: getMainIndexById(masterFlow[currentMainIndex.value].endId),
           skipped: skipping.value,
         );
-
+        // removeSkippedFlow();
         currentMainIndex.value =
             getMainIndexById(masterFlow[currentMainIndex.value].startId);
         masterFlow[currentMainIndex.value].previousId = preId.value;
         answerController.clear();
-        checkAnswerAvailable();
+        await checkAnswerAvailable();
         update();
         if (checkCondition(currentMainIndex.value) == true) {
           if (skipping.value == false) {
@@ -527,7 +507,7 @@ class FlowController extends GetxController {
       break;
 
 
-      ///FOR OPTIONS
+    ///FOR OPTIONS
       case 7 :
       case 8 :{
         enterAge();
@@ -541,7 +521,7 @@ class FlowController extends GetxController {
             masterFlow[currentMainIndex.value].next![0].destElementId!);
         masterFlow[currentMainIndex.value].previousId = preId.value;
         answerController.clear();
-        checkAnswerAvailable();
+        await checkAnswerAvailable();
         update();
 
         if (checkCondition(currentMainIndex.value) == true) {
