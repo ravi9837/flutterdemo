@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/Controller/flowController.dart';
+import 'package:flutterdemo/widgets/titleTextField.dart';
 import 'package:get/get.dart';
 
 class TextEditorUiPage extends GetView<FlowController> {
@@ -13,56 +14,13 @@ class TextEditorUiPage extends GetView<FlowController> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child:Column(
-        children: [
-          SizedBox(
-            child: TextField(
-              controller: controller.answerController,
-              decoration: InputDecoration(
-                hintText: "ANSWER",
-                errorText: controller.validate.value
-                    ? "value can't be null"
-                    : null,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    controller.decrementForMainFlow();
-                  },
-                  child: const Icon(Icons.arrow_back)),
-              const SizedBox(
-                height: 10,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    // controller. vitalValidation();
-                    controller.checkMandatory();
-                    closeKeyBoard(context);
-                  },
-                  child: const Icon(Icons.arrow_forward)),
-              const SizedBox(
-                height: 10,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                  },
-                  child: const Icon(Icons.telegram)
-              ),
-            ],
-          ),
-        ],
-      ),
+    return TitleTextField(
+      title: controller.masterFlow[controller.currentMainIndex.value].text,
+      keyboardType: TextInputType.text,
+      hint: '${controller.masterFlow[controller.currentMainIndex.value].text}',
+      labelText: '${controller.masterFlow[controller.currentMainIndex.value].text}',
+      controller: controller.answerController,
     );
-
   }
 }
 

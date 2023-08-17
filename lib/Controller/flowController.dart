@@ -1,16 +1,36 @@
 import 'dart:convert';
+import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutterdemo/Model/questionModelForMaster.dart';
+import 'package:flutterdemo/constants/appColors.dart';
+import 'package:flutterdemo/constants/screenSize.dart';
 import 'package:flutterdemo/widgets/TextFieldUi.dart';
+import 'package:flutterdemo/widgets/bottomSheet.dart';
 import 'package:flutterdemo/widgets/is_numeric_ui.dart';
 import 'package:flutterdemo/widgets/nothing.dart';
+import 'package:flutterdemo/widgets/titleTextField.dart';
 import 'package:flutterdemo/widgets/toastMessage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class FlowController extends GetxController {
+
+  RxInt optionsChoiceIndex = (-1).obs;
+  RxString optionsChoiceTag = "".obs;
+
+  List<String> multiOptionsStringList = [];
+
+  RxString multiOptionsString = "".obs;
+
+  RxString selectedDateRangeFormat = "days".obs;
+
+  ///PATIENT IS NEW OR NOT
+  RxBool isNewPatient = true.obs;
+
   /// VALIDATION FOR TEXT FIELD
   RxBool validate = false.obs;
 
@@ -34,6 +54,17 @@ class FlowController extends GetxController {
 
   ///TEXT EDITING CONTROLLER FOR ALL THE ANSWERS
   TextEditingController answerController = TextEditingController();
+
+  ///TEXT EDITING CONTROLLER FOR ALL THE AGE IN YEARS
+  TextEditingController answerYearsController = TextEditingController();
+
+  ///TEXT EDITING CONTROLLER FOR ALL THE AGE IN MONTHS
+  TextEditingController answerMonthsController = TextEditingController();
+
+  ///TEXT EDITING CONTROLLER FOR ALL THE AGE IN DAYS
+  TextEditingController answerDaysController = TextEditingController();
+
+  DateTime selectedDateDob = DateTime.now();
 
   ///DEFAULT AGE FOR RENDERING QUESTIONS
   RxDouble age = (35.0).obs;
@@ -694,35 +725,674 @@ class FlowController extends GetxController {
   }
 
   ///UPDATE UI ACCORDING TO THE SELECTED MODE OF THE QUESTION
- Widget updateUi(){
+ Widget updateUi(BuildContext context){
     switch(masterFlow[currentMainIndex.value].selectedMode){
       case "textEditor":{
-        return const TextEditorUiPage();
+        return TitleTextField(
+          title: masterFlow[currentMainIndex.value].text,
+          keyboardType: TextInputType.text,
+          hint: '${masterFlow[currentMainIndex.value].text}',
+          labelText: '${masterFlow[currentMainIndex.value].text}',
+          controller: answerController,
+        );
       }
       case "isNumeric":{
-        return const IsNumericUiPage();
+        return TitleTextField(
+          title: masterFlow[currentMainIndex.value].text,
+          keyboardType: TextInputType.number,
+          hint: '${ masterFlow[currentMainIndex.value].text}',
+          labelText: '${ masterFlow[currentMainIndex.value].text}',
+          controller: answerController,
+        );
       }
       case "isOptions":{
-        return const NothingUiPage();
+        List<String> options = masterFlow[currentMainIndex.value].options.split("#");
+
+        if (options.length == 2) {
+          // Display options in a row without radio buttons
+
+          if (masterFlow[currentMainIndex.value].text == "Gender") {
+            if (isNewPatient.value == false) {
+              return SizedBox(
+                width: ScreenSize.width(context) * 0.8,
+                child: Obx(
+                      () => ChipsChoice<int>.single(
+                    choiceStyle: C2ChipStyle.filled(
+                      foregroundStyle: TextStyle(
+                          color: AppColor.blackMild,
+                          fontSize: ScreenSize.width(context) * 0.04,
+                          fontWeight: FontWeight.bold),
+                      height: ScreenSize.height(context) * 0.05,
+                      foregroundColor: AppColor.primaryColor,
+                      color: AppColor.greyShimmer,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ScreenSize.width(context) * 0.04,
+                      ),
+                      selectedStyle: const C2ChipStyle(
+                        backgroundColor: AppColor.primaryColor,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                    ),
+                    value: optionsChoiceIndex.value,
+                    onChanged: (val) {
+                      showToast("CAN NOT UPDATE GENDER FOR FOLLOW UP PATIENT",
+                          ToastGravity.CENTER);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: options,
+                      value: (i, v) => i,
+                      label: (i, v) => v.toUpperCase(),
+                    ),
+                    wrapped: false,
+                  ),
+                ),
+              );
+            } else {
+              return SizedBox(
+                width: ScreenSize.width(context) * 0.8,
+                child: Obx(
+                      () => ChipsChoice<int>.single(
+                    choiceStyle: C2ChipStyle.filled(
+                      foregroundStyle: TextStyle(
+                          color: AppColor.blackMild,
+                          fontSize: ScreenSize.width(context) * 0.04,
+                          fontWeight: FontWeight.bold),
+                      height: ScreenSize.height(context) * 0.05,
+                      foregroundColor: AppColor.primaryColor,
+                      color: AppColor.greyShimmer,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ScreenSize.width(context) * 0.04,
+                      ),
+                      selectedStyle: const C2ChipStyle(
+                        backgroundColor: AppColor.primaryColor,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                    ),
+                    value: optionsChoiceIndex.value,
+                    onChanged: (val) {
+                      print("THIS IS VALUE $val");
+
+                      //showToast("THIS IS VALUE $val", ToastGravity.CENTER);
+
+                      ///UPDATES QUESTIONS CHOICES
+                      updateOptionsChoice(
+                          options: options, index: val);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: options,
+                      value: (i, v) => i,
+                      label: (i, v) => v.toUpperCase(),
+                    ),
+                    wrapped: false,
+                  ),
+                ),
+              );
+            }
+          } else {
+            return SizedBox(
+              width: ScreenSize.width(context) * 0.8,
+              child: Obx(
+                    () => ChipsChoice<int>.single(
+                  choiceStyle: C2ChipStyle.filled(
+                    foregroundStyle: TextStyle(
+                        color: AppColor.blackMild,
+                        fontSize: ScreenSize.width(context) * 0.04,
+                        fontWeight: FontWeight.bold),
+                    height: ScreenSize.height(context) * 0.05,
+                    foregroundColor: AppColor.primaryColor,
+                    color: AppColor.greyShimmer,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ScreenSize.width(context) * 0.04,
+                    ),
+                    selectedStyle: const C2ChipStyle(
+                      backgroundColor: AppColor.primaryColor,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(10),
+                      ),
+                    ),
+                  ),
+                  value: optionsChoiceIndex.value,
+                  onChanged: (val) {
+                    print("THIS IS VALUE $val");
+
+                    //showToast("THIS IS VALUE $val", ToastGravity.CENTER);
+
+                    ///UPDATES QUESTIONS CHOICES
+                    updateOptionsChoice(
+                        options: options, index: val);
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: options,
+                    value: (i, v) => i,
+                    label: (i, v) => v.toUpperCase(),
+                  ),
+                  wrapped: false,
+                ),
+              ),
+            );
+          }
+        } else {
+          ///DISPLAY OPTIONS OF RADIO BUTTON IN A COLUMN
+          return SizedBox(
+            width: ScreenSize.width(context) * 0.8,
+            height: ScreenSize.height(context) * 0.75,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Choose one Answer",
+                    style: TextStyle(
+                      fontSize: ScreenSize.width(context) * 0.04,
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.blackMild,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height:
+                      10), // Add some spacing between the text and options
+
+                  ...List.generate(
+                    options.length,
+                        (index) => RadioListTile<int>(
+                      value: index,
+                      groupValue: optionsChoiceIndex.value,
+                      onChanged: (val) {
+                        debugPrint("Selected value: $val");
+                        updateOptionsChoice(
+                          options: options,
+                          index: index,
+                        );
+                      },
+                      title: Text(
+                        options[index].toUpperCase(),
+                        style: TextStyle(
+                          fontSize: ScreenSize.width(context) * 0.04,
+                          fontWeight: FontWeight.bold,
+                          color: AppColor.blackMild,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
       }
       case "isDateField":{
-        return const NothingUiPage();
+        return masterFlow[currentMainIndex.value].text == "Select Date of Birth"
+            ? Obx(() => isNewPatient.value
+            ?
+
+        ///NEW PATIENT - TAKES REGISTRATION
+        Column(
+          children: [
+            Row(
+              children: [
+                /// TEXT FIELD FOR THE YEAR TEXT FIELD
+                Expanded(
+                  child: TitleTextField(
+                    title: "Years",
+                    hint: "Years",
+                    labelText: "Years",
+                    keyboardType: TextInputType.number,
+                    len: 3,
+                    controller: answerYearsController,
+                  ),
+                ),
+
+                /// TEXT FIELD FOR THE MONTH TEXT FIELD
+                Expanded(
+                  child: TitleTextField(
+                    title: "Months",
+                    hint: "Months",
+                    labelText: "Months",
+                    keyboardType: TextInputType.number,
+                    len: 2,
+                    controller: answerMonthsController,
+                  ),
+                ),
+
+                /// TEXT FIELD FOR THE DAY TEXT FIELD
+                Expanded(
+                  child: TitleTextField(
+                    title: "Days",
+                    hint: "Days",
+                    labelText: "Days",
+                    keyboardType: TextInputType.number,
+                    len: 2,
+                    controller: answerDaysController,
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    child: GestureDetector(
+                      onTap: () async {
+                        /// SHOW DATE PICKER
+                        DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now());
+
+                        if (pickedDate != null) {
+                          final now = DateTime.now();
+
+                          /// FIND THE AGE BASED ON THE CURRENT AGE AND THE DATE OF BIRTH
+                          // Calculate the difference between the two dates
+                          Duration difference =
+                          now.difference(pickedDate);
+
+                          // Calculate the years, months, and days
+                          int years = difference.inDays ~/ 365;
+                          int months =
+                              ((difference.inDays % 365) ~/ 30) % 12;
+                          int days = (difference.inDays % 365) % 30;
+
+                          // Update years if months reach 12
+                          if (months == 12) {
+                            years++;
+                            months = 0;
+                          }
+
+                          /// UPDATE THE VALUES IN THE TEXT FIELD
+                          /// YEAR CONTROLLER
+                          answerYearsController
+                              .text = years.toString();
+
+                          /// MONTH CONTROLLER
+                          answerMonthsController
+                              .text = months.toString();
+
+                          /// DAY CONTROLLER
+                          answerDaysController
+                              .text = days.toString();
+
+
+                          selectedDateDob = pickedDate;
+
+                        } else {}
+                      },
+                      child: const CircleAvatar(
+                        backgroundColor: AppColor.primaryColor,
+                        radius: 25,
+                        child: Icon(
+                          Icons.calendar_month,
+                          color: AppColor.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        )
+            :
+
+        ///DOESN'T ALLOW YOU TO EDIT IF THE PATIENT IS ALREADY REGISTERED
+        GestureDetector(
+          onTap: () {
+            showToast("can not edit already existing patient age", ToastGravity.TOP);
+          },
+          child: Container(
+            height: ScreenSize.height(context) * 0.075,
+            width: ScreenSize.width(context) * 0.9,
+            decoration: BoxDecoration(
+              color: AppColor.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            margin: EdgeInsets.only(
+                left: ScreenSize.width(context) * 0.01,
+                right: ScreenSize.width(context) * 0.01),
+            padding: EdgeInsets.only(
+                left: ScreenSize.width(context) * 0.01,
+                right: ScreenSize.width(context) * 0.01,
+                top: ScreenSize.height(context) * 0.01,
+                bottom: ScreenSize.height(context) * 0.01),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Center(
+                child: Text(
+                  //"${DateFormat("dd MMM yyyy").format(DateFormat("MMMM d, yyyy hh:mm:ss a").parse(userController.personalQuestionsModel.dob!)).toUpperCase()}",
+                  //"${questionsController.dobFollowUp.value}",
+                  "CAN NOT EDIT AGE",
+                  style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500,
+                      color: AppColor.tertiaryColor),
+                ),
+              ),
+            ),
+          ),
+        ))
+            : TitleTextField(
+          title: masterFlow[currentMainIndex.value].text,
+          hint: '${masterFlow[currentMainIndex.value].text}',
+          labelText: '${masterFlow[currentMainIndex.value].text}',
+          keyboardType: TextInputType.phone,
+          len: int.tryParse(masterFlow[currentMainIndex.value].range[0].length),
+          controller: answerController,
+          //onSubmit: (val) => questionsController.answerController.text.length != elements.selectedLength ? showToast("Please enter ${elements.selectedLength} digits", ToastGravity.CENTER) : null,
+        );
       }
       case "isDateTimeField":{
-        return const NothingUiPage();
+        ///ASSIGNING BY DEFAULT
+        final defaultDateString = DateFormat('MMM dd, yyyy hh:mm:ss a').format(
+            DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day, 0, 0, 0));
+
+        return Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: ScreenSize.height(context) * 0.075,
+                  width: ScreenSize.width(context) * 0.68,
+                  decoration: BoxDecoration(
+                    color: AppColor.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  margin: EdgeInsets.only(
+                      left: ScreenSize.width(context) * 0.01,
+                      right: ScreenSize.width(context) * 0.01),
+                  padding: EdgeInsets.only(
+                      left: ScreenSize.width(context) * 0.01,
+                      right: ScreenSize.width(context) * 0.01,
+                      top: ScreenSize.height(context) * 0.01,
+                      bottom: ScreenSize.height(context) * 0.01),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Center(
+                      child: AutoSizeText(
+                        answerController.text == ""
+                            ? defaultDateString
+                            : answerController.text,
+                        minFontSize: 14.0,
+                        maxFontSize: 32.00,
+                        style: const TextStyle(
+                            fontSize: 20.00,
+                            fontWeight: FontWeight.w500,
+                            color: AppColor.tertiaryColor),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    child: GestureDetector(
+                      onTap: () async {
+                        ///TOAST MESSAGE FOR ANC VISIT DATE
+                        if (masterFlow[currentMainIndex.value].text == "ANC Visit Date") {
+                          showToast(
+                              "Visit Date is today's date by default. Can not make changes",
+                              ToastGravity.CENTER);
+                          return;
+                        } else {
+                          /// SHOW DATE PICKER
+                          DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now());
+
+                          if (pickedDate != null) {
+                            String formattedDate =
+                            DateFormat('MMM dd, yyyy hh:mm:ss a').format(
+                                DateTime(pickedDate.year, pickedDate.month,
+                                    pickedDate.day, 0, 0, 0));
+
+
+                             answerController.text = formattedDate;
+                            update();
+                          } else {
+                            ///ASSIGNING DEFAULT DATE
+
+                              answerController.text =
+                                  DateFormat('MMM dd, yyyy hh:mm:ss a').format(
+                                      DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day,
+                                          0,
+                                          0,
+                                          0));
+                            update();
+                          }
+                        }
+                      },
+                      child: const CircleAvatar(
+                        backgroundColor: AppColor.primaryColor,
+                        radius: 25,
+                        child: Icon(
+                          Icons.calendar_month,
+                          color: AppColor.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        );
       }
       case "duration":{
-        return const NothingUiPage();
+        return Row(
+          children: [
+            /// DURATION QUESTION TEXT FIELD WITH THE DROPDOWN BUTTON
+            Expanded(
+              //width: ScreenSize.width(context) * 0.5,
+              child: TitleTextField(
+                title: masterFlow[currentMainIndex.value].text,
+                keyboardType: TextInputType.phone,
+                hint: '${masterFlow[currentMainIndex.value].text}',
+                labelText: '${masterFlow[currentMainIndex.value].text}',
+                controller: answerController,
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 25,
+              ),
+              child: SizedBox(
+                height: ScreenSize.height(context) * 0.05,
+                width: ScreenSize.height(context) * 0.1,
+                child: DropdownButton<String>(
+                  underline: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: AppColor.primaryColor, width: 0.5)),
+                  ),
+                  value: selectedDateRangeFormat.value,
+
+                  /// OPTION VALUES IN THE DROPDOWN FIELD
+                  items: <String>['days', 'weeks', 'months', 'years']
+                      .map<DropdownMenuItem<String>>(
+                        (String option) => DropdownMenuItem<String>(
+                      value: option,
+                      child: Text(
+                        option,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  )
+                      .toList(),
+                  onChanged: (String? newValue) {
+
+                      selectedDateRangeFormat.value =
+                      newValue!;
+
+
+                    /// TODO SET STATE MUST BE REMOVE FROM HERE
+                    /// SELECTED VALUE REFLECT IN THE TEXT FIELD FOR THE DURATION QUESTIONS
+                    // setState(() {
+                    //   questionsController.answerController.text = '${questionsController.answerController.text} ${finalValue!}';
+                    // });
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(
+              width: 10,
+            ),
+          ],
+        );
       }
       case "isMultiOptions":{
-        return const NothingUiPage();
+        List<String> multiOptions = masterFlow[currentMainIndex.value].options.split("#");
+
+        return Obx(() => multiOptionsString.value == ""
+            ?
+
+        ///SELECT ITEMS
+        GestureDetector(
+          onTap: () async {
+            showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return MultiOptionsBottomSheet(
+                    items: multiOptions,
+                    selectedItems:multiOptionsStringList, // Pass the selected items here
+                    onSave: (selectedItems) {
+
+                        updateListToStringForMultiOptions(
+                            selectedOptions: selectedItems);
+                    update();
+                    },
+                  );
+                });
+          },
+          child: Container(
+            height: ScreenSize.height(context) * 0.075,
+            width: ScreenSize.width(context) * 0.9,
+            decoration: BoxDecoration(
+              color: AppColor.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            margin: EdgeInsets.only(
+                left: ScreenSize.width(context) * 0.01,
+                right: ScreenSize.width(context) * 0.01),
+            padding: EdgeInsets.only(
+                left: ScreenSize.width(context) * 0.01,
+                right: ScreenSize.width(context) * 0.01,
+                top: ScreenSize.height(context) * 0.01,
+                bottom: ScreenSize.height(context) * 0.01),
+            child: const Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                "TAP TO CHOOSE OPTIONS",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColor.tertiaryColor),
+              ),
+            ),
+          ),
+        )
+            :
+
+        ///SELECTED ITEMS
+        GestureDetector(
+          onTap: () async {
+            showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return MultiOptionsBottomSheet(
+                    items: multiOptions,
+                    selectedItems: multiOptionsStringList, // Pass the selected items here
+                    onSave: (selectedItems) {
+
+                        updateListToStringForMultiOptions(
+                            selectedOptions: selectedItems);
+                        update();
+                    },
+                  );
+                });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColor.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            margin: EdgeInsets.symmetric(
+              horizontal: ScreenSize.width(context) * 0.01,
+            ),
+            padding: EdgeInsets.all(
+              ScreenSize.width(context) * 0.01,
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: multiOptionsStringList.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${multiOptionsStringList[index]}\n",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ));
       }
       case "":{
-        return const NothingUiPage();
+        return TitleTextField(
+          title: masterFlow[currentMainIndex.value].text,
+          keyboardType: TextInputType.text,
+          hint: '${masterFlow[currentMainIndex.value].text}',
+          labelText: '${masterFlow[currentMainIndex.value].text}',
+          controller: answerController,
+        );
       }
     }
     return Container(
       color: Colors.teal,
     );
+  }
+
+  //UPDATE OPTIONS SINGLE STRING TO
+  updateListToStringForMultiOptions({List<String>? selectedOptions}) {
+    String finalSelectedOptions = "";
+
+    for (int i = 0; i < selectedOptions!.length; i++) {
+      if (i == selectedOptions!.length - 1) {
+        finalSelectedOptions = "$finalSelectedOptions${selectedOptions[i]}";
+      } else {
+        finalSelectedOptions = "$finalSelectedOptions${selectedOptions[i]}#";
+      }
+    }
+
+    multiOptionsStringList = selectedOptions!;
+    multiOptionsString.value = finalSelectedOptions.replaceAll("\t", "");
+    update();
+  }
+
+
+
+  ///UPDATES OPTION CHOICE INDEX AND VALUE
+  updateOptionsChoice({required List<String> options, required int index}) {
+    optionsChoiceIndex.value = index;
+    optionsChoiceTag.value = options[optionsChoiceIndex.value].toLowerCase();
+    update();
   }
 }

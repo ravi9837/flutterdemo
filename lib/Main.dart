@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/Controller/flowController.dart';
 import 'package:flutterdemo/View/QuestionScreen.dart';
+import 'package:flutterdemo/constants/appColors.dart';
 import 'package:get/get.dart';
 
 void main() async {
@@ -18,7 +19,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.deepPurple),
         useMaterial3: true,
       ),
       home: const QuestionPage(),
