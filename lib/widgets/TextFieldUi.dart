@@ -44,6 +44,7 @@ class TextEditorUiPage extends GetView<FlowController> {
               ),
               ElevatedButton(
                   onPressed: () {
+                    // controller. vitalValidation();
                     controller.checkMandatory();
                     closeKeyBoard(context);
                   },

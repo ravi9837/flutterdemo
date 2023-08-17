@@ -36,7 +36,7 @@ class FlowController extends GetxController {
   TextEditingController answerController = TextEditingController();
 
   ///DEFAULT AGE FOR RENDERING QUESTIONS
-  RxDouble age = (0.112).obs;
+  RxDouble age = (35.0).obs;
 
   ///DEFAULT GENDER FOR RENDERING QUESTIONS
   RxString gender = "female".obs;
@@ -142,14 +142,14 @@ class FlowController extends GetxController {
 
   ///GETTING THE AGE INPUT FROM USER
   void enterAge() {
-    if (masterFlow[currentMainIndex.value].text == "Sel ect Date of Birth") {
+    if (masterFlow[currentMainIndex.value].text == "Select Date of Birth") {
       age.value = double.tryParse(masterFlow[currentMainIndex.value].answer) ?? 18.0;
     }
   }
 
   ///GETTING THE GENDER INPUT FR OM USER
   void enterGender() {
-    if (masterFlow[currentMainIndex.value].text == "Sel ect Gender") {
+    if (masterFlow[currentMainIndex.value].text == "Select Gender") {
       gender.value = masterFlow[currentMainIndex.value].answer ?? "female";
     }
   }
@@ -238,7 +238,9 @@ class FlowController extends GetxController {
 
   /// INCREMENT LOGIC FOR QUESTIONS
   Future<void> incrementForMainFlow() async {
-    ///
+
+    // vitalValidation();
+
     previousMainId.value = masterFlow[currentMainIndex.value].id;
     masterFlow[currentMainIndex.value].answer = answerController.text;
     update();
@@ -297,7 +299,7 @@ class FlowController extends GetxController {
           currentMainIndex.value = getMainIndexById(masterFlow[currentMainIndex.value].next![0].destElementId!);
           masterFlow[currentMainIndex.value].previousId = preId.value;
           answerController.clear();
-          // checkAnswerAvailable();
+          await checkAnswerAvailable();
           update();
 
 
@@ -607,7 +609,69 @@ class FlowController extends GetxController {
   ///CHECK IF THE QUESTION IS MANDATORY THAN DON'T SKIP IT
   ///THIS FUNCTION WILL BE USED FOR INCREMENTING THE QUESTIONS
   checkMandatory() {
-    if (masterFlow[currentMainIndex.value].isMandatory == "true") {
+    /// FOR SYST0LIC AND DIASTOLIC VALIDATION
+    if(masterFlow[currentMainIndex.value].selectedGroup == "Vitals") {
+      if (masterFlow[currentMainIndex.value].range[0].min != "" &&
+          masterFlow[currentMainIndex.value].range[0].max != "" &&
+          masterFlow[currentMainIndex.value].range[0].pattern != "") {
+        if(answerController.text.split('/').length != 2) {
+          showToast("Please enter BP in xxx/xxx Format", ToastGravity.CENTER);
+          return;
+        }
+        else if((double.tryParse(answerController.text.split('/')[0])! < double.tryParse(masterFlow[currentMainIndex.value].range[0].min)!) &&
+            (double.tryParse(answerController.text.split('/')[1])! > double.tryParse(masterFlow[currentMainIndex.value].range[0].max)!)) {
+          showToast("Invalid values for ${masterFlow[currentMainIndex.value].text}", ToastGravity.CENTER);
+          return;
+        }
+        else if (answerController.text.split('/')[0] == "") {
+          showToast("Invalid Systolic value", ToastGravity.CENTER);
+          return;
+        }
+        else if (answerController.text.split('/')[1] == "") {
+          showToast("Invalid Diastolic value", ToastGravity.CENTER);
+          return;
+        }
+        else if (double.tryParse(answerController.text.split('/')[0])! <
+            double.tryParse(masterFlow[currentMainIndex.value].range[0].min)!) {
+          showToast(
+              "Invalid Systolic value (out of min range)", ToastGravity.CENTER);
+          return;
+        }
+        else if (double.tryParse(answerController.text.split('/')[1])! >
+            double.tryParse(masterFlow[currentMainIndex.value].range[0].max)!) {
+          showToast("Invalid Diastolic value (out of max range)",
+              ToastGravity.CENTER);
+          return;
+        }else{
+          incrementForMainFlow();
+          return;
+        }
+      }else{
+        incrementForMainFlow();
+        return;
+      }
+    }
+
+    if(masterFlow[currentMainIndex.value].selectedGroup == "Vitals"){
+      if(masterFlow[currentMainIndex.value].range[0].min != "" &&
+          masterFlow[currentMainIndex.value].range[0].max != "" ){
+        if(double.tryParse(answerController.text)! < double.tryParse(masterFlow[currentMainIndex.value].range[0].min)!  ||
+            double.tryParse(answerController.text)! > double.tryParse(masterFlow[currentMainIndex.value].range[0].max)!){
+          showToast(
+              "invalid value for ${masterFlow[currentMainIndex.value].text}",
+              ToastGravity.CENTER);
+          return;
+        }else{
+          incrementForMainFlow();
+          return;
+        }
+      }else{
+        incrementForMainFlow();
+        return;
+      }
+    }
+
+    if (masterFlow[currentMainIndex.value].isMandatory == "true" && masterFlow[currentMainIndex.value].selectedGroup != "Vitals") {
       ///VALIDATIONS
       if (answerController.text.isEmpty) {
         showToast(
@@ -620,7 +684,7 @@ class FlowController extends GetxController {
         return;
       }
     }
-    if (masterFlow[currentMainIndex.value].isMandatory == "false") {
+    if (masterFlow[currentMainIndex.value].isMandatory == "false" && masterFlow[currentMainIndex.value].selectedGroup != "Vitals") {
       ///VALIDATIONS
       if (answerController.text.isEmpty || answerController.text.isNotEmpty) {
         incrementForMainFlow();
@@ -660,6 +724,5 @@ class FlowController extends GetxController {
     return Container(
       color: Colors.teal,
     );
-
   }
 }

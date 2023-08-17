@@ -50,6 +50,7 @@ class IsNumericUiPage extends GetView<FlowController> {
                     // controller.validate.value = false;
 
                     // controller.validate.value == false ?
+                    // controller. vitalValidation();
                     controller.checkMandatory();
                     // :
                     // null;
